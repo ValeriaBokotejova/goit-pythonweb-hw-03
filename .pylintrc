@@ -1,0 +1,19 @@
+[MESSAGES CONTROL]
+disable=
+    C0103,  # invalid-name (do_POST, do_GET)
+    C0114,  # missing-module-docstring
+    C0115,  # missing-class-docstring
+    C0116,  # missing-function-docstring
+    W0718   # broad-exception-caught
+
+[FORMAT]
+max-line-length=100
+
+[MASTER]
+ignore=venv,__pycache__
+
+[DESIGN]
+max-args=5
+max-locals=15
+max-branches=10
+max-statements=50
