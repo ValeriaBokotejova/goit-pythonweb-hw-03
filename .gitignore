@@ -1,0 +1,39 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# VS Code settings
+.vscode/
+
+# PyCharm settings
+.idea/
+
+# macOS system files
+.DS_Store
+
+# Log and data files
+*.log
+*.sqlite3
+*.db
+*.json~
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Unit test / coverage
+htmlcov/
+.tox/
+coverage.xml
+.cache
+pytest_cache/
+
+# pre-commit
+.pre-commit-config.yaml~
