@@ -9,7 +9,7 @@ from urllib.parse import parse_qs
 from jinja2 import Environment, FileSystemLoader, TemplateError
 
 BASE_DIR = Path(__file__).parent
-TEMPLATES_DIR = BASE_DIR
+TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR
 STORAGE_DIR = BASE_DIR / "storage"
 DATA_FILE = STORAGE_DIR / "data.json"
@@ -22,18 +22,19 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         """Handles GET requests: routes to HTML pages or static files."""
-        if self.path in {"/", "/index"}:
-            self.render_template("index.html")
-        elif self.path == "/message":
-            self.render_template("message.html")
-        elif self.path == "/read":
-            self.render_messages()
-        elif self.path.startswith("/style.css"):
-            self.serve_static_file("style.css", content_type="text/css")
-        elif self.path.startswith("/logo.png"):
-            self.serve_static_file("logo.png", content_type="image/png")
-        else:
-            self.send_error_page()
+        match self.path:
+            case "/" | "/index" | "/index.html":
+                self.render_template("index.html")
+            case "/message":
+                self.render_template("message.html")
+            case "/read":
+                self.render_messages()
+            case "/style.css":
+                self.serve_static_file("style.css", content_type="text/css")
+            case "/logo.png":
+                self.serve_static_file("logo.png", content_type="image/png")
+            case _:
+                self.send_error_page()
 
     def do_POST(self):
         """Handles POST request from the message form."""
@@ -68,7 +69,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         """Reads stored messages from JSON and renders them on the /read page."""
         if DATA_FILE.exists():
             with open(DATA_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                try:
+                    data = json.load(f)
+                except json.JSONDecodeError:
+                    data = {}
         else:
             data = {}
 
