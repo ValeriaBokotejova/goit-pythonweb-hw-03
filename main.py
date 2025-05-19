@@ -10,7 +10,7 @@ from jinja2 import Environment, FileSystemLoader, TemplateError
 
 BASE_DIR = Path(__file__).parent
 TEMPLATES_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR
+STATIC_DIR = BASE_DIR / "static"
 STORAGE_DIR = BASE_DIR / "storage"
 DATA_FILE = STORAGE_DIR / "data.json"
 
@@ -29,10 +29,11 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
                 self.render_template("message.html")
             case "/read":
                 self.render_messages()
-            case "/style.css":
-                self.serve_static_file("style.css", content_type="text/css")
-            case "/logo.png":
-                self.serve_static_file("logo.png", content_type="image/png")
+            case "/favicon.ico":
+                self.serve_static_file("favicon.ico", content_type="image/x-icon")
+            case path if path.startswith("/static/"):
+                filename = path.lstrip("/")
+                self.serve_static_file(filename, self.get_content_type(filename))
             case _:
                 self.send_error_page()
 
@@ -80,8 +81,8 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.render_template("read.html", context)
 
     def serve_static_file(self, filename, content_type):
-        """Serves static files like CSS or images."""
-        file_path = BASE_DIR / filename
+        """Serves static files like CSS, favicon, or images."""
+        file_path = STATIC_DIR / Path(filename).name
         if file_path.exists():
             with open(file_path, "rb") as f:
                 content = f.read()
@@ -91,6 +92,16 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(content)
         else:
             self.send_error_page()
+
+    def get_content_type(self, filename):
+        """Returns appropriate Content-Type for static file extensions."""
+        if filename.endswith(".css"):
+            return "text/css"
+        if filename.endswith(".png"):
+            return "image/png"
+        if filename.endswith(".ico"):
+            return "image/x-icon"
+        return "application/octet-stream"
 
     def save_message(self, username, message):
         """Saves a form-submitted message to storage/data.json with a timestamp."""
@@ -113,7 +124,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     def send_error_page(self):
         """Sends a 404 error page if the requested resource is not found."""
         try:
-            with open(BASE_DIR / "error.html", "r", encoding="utf-8") as f:
+            with open(TEMPLATES_DIR / "error.html", "r", encoding="utf-8") as f:
                 content = f.read()
             self.send_response(404)
             self.send_header("Content-Type", "text/html")
